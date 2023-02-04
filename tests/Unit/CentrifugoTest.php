@@ -4,36 +4,29 @@ namespace Opekunov\Centrifugo\Tests\Unit;
 
 use GuzzleHttp\Exception\ConnectException;
 use Opekunov\Centrifugo\Centrifugo;
-use Opekunov\Centrifugo\Exceptions\CentrifugoConnectionException;
-use Opekunov\Centrifugo\Tests\TestCase;
 
-class CentrifugoTest extends TestCase
+class CentrifugoTest extends \Opekunov\Centrifugo\Tests\TestCase
 {
     public function testGenerateToken()
     {
         $timestamp = 1491650279;
+        $user_id = 1;
         $info = [
             'first_name' => 'Aleksandr',
             'last_name'  => 'Opekunov',
         ];
-        $clientId = '0c951315-be0e-4516-b99e-05e60b0cc317';
+        $client = '0c951315-be0e-4516-b99e-05e60b0cc317';
 
-        $clientToken1 = $this->centrifuge->generateConnectionToken($clientId, $timestamp);
-        $this->assertEquals(
-            'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwYzk1MTMxNS1iZTBlLTQ1MTYtYjk5ZS0wNWU2MGIwY2MzMTciLCJleHAiOjE0OTE2NTAyNzl9.jue8OmcTwCwyDtV-eEz5HTudI8G7kr7cK2lAoi_hMyE',
-            $clientToken1
-        );
+        $clientToken1 = $this->centrifuge->generateConnectionToken($client, $timestamp);
+        $this->assertEquals('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwYzk1MTMxNS1iZTBlLTQ1MTYtYjk5ZS0wNWU2MGIwY2MzMTciLCJleHAiOjE0OTE2NTAyNzl9.7l9xTSgNDE-b2770rLNk7aN1xlG-jIKx2oz578fEnNg', $clientToken1);
 
-        $clientToken2 = $this->centrifuge->generateSubscriptionToken($clientId, 'test', $timestamp, $info);
-        $this->assertEquals(
-            'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwYzk1MTMxNS1iZTBlLTQ1MTYtYjk5ZS0wNWU2MGIwY2MzMTciLCJleHAiOjE0OTE2NTAyNzksImNoYW5uZWwiOiJ0ZXN0IiwiaW5mbyI6eyJmaXJzdF9uYW1lIjoiQWxla3NhbmRyIiwibGFzdF9uYW1lIjoiT3Bla3Vub3YifX0.fagXHy6MAaziGVGwgtWHWqMEGGvbg5ldHpA2dB5Nc7M',
-            $clientToken2
-        );
+        $clientToken2 = $this->centrifuge->generateConnectionToken($user_id, $timestamp, $info);
+        $this->assertEquals('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaW5mbyI6eyJmaXJzdF9uYW1lIjoiQWxla3NhbmRyIiwibGFzdF9uYW1lIjoiT3Bla3Vub3YifSwiZXhwIjoxNDkxNjUwMjc5fQ.lacRMie5NCXLhLPZ29rgAwPjCm44C1Fm48Dh0seZ6LU', $clientToken2);
     }
 
     public function testCentrifugoApiPublish()
     {
-        $publish = $this->centrifuge->publish('test-test', ['event' => 'test-event']);
+        $publish = $this->centrifuge->publish('test-channel', ['event' => 'test-event']);
         $this->assertEquals(['result' => []], $publish);
     }
 
@@ -42,7 +35,7 @@ class CentrifugoTest extends TestCase
         $publish = $this->centrifuge->publishMany(
             [['channel' => 'test-channel:1', 'data' => 'Hello'], ['channel' => 'test-channel:2', 'data' => 'World']]
         );
-        $this->assertEquals([], $publish);
+        $this->assertEquals(null, $publish);
     }
 
     public function testCentrifugoApiBroadcast()
@@ -75,7 +68,7 @@ class CentrifugoTest extends TestCase
     public function testCentrifugoApiChannels()
     {
         $channels = $this->centrifuge->channels();
-        $this->assertArrayHasKey('channels', $channels['result']);
+        $this->assertEquals(['result' => ['channels' => []]], $channels);
     }
 
     public function testCentrifugoApiUnsubscribe()
@@ -119,7 +112,7 @@ class CentrifugoTest extends TestCase
         );
 
         $start = microtime(true);
-        $this->expectException(CentrifugoConnectionException::class);
+        $this->expectException(ConnectException::class);
 
         try {
             $badCentrifugo->publish('test-channel', ['event' => 'test-event']);
@@ -151,7 +144,7 @@ class CentrifugoTest extends TestCase
         );
 
         $start = microtime(true);
-        $this->expectException(CentrifugoConnectionException::class);
+        $this->expectException(ConnectException::class);
 
         try {
             $badCentrifugo->publish('test-channel', ['event' => 'test-event']);

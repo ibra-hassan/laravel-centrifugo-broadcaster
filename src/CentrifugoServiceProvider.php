@@ -14,7 +14,7 @@ class CentrifugoServiceProvider extends ServiceProvider
     /**
      * Add centrifugo broadcaster.
      *
-     * @param  BroadcastManager  $broadcastManager
+     * @param \Illuminate\Broadcasting\BroadcastManager $broadcastManager
      */
     public function boot(BroadcastManager $broadcastManager)
     {
@@ -28,7 +28,7 @@ class CentrifugoServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function register(): void
+    public function register()
     {
         $this->app->singleton('centrifugo', function ($app) {
             $config = $app->make('config')->get('broadcasting.connections.centrifugo');
