@@ -2,6 +2,6 @@
 
 namespace Opekunov\Centrifugo\Exceptions;
 
-final class CentrifugoConnectionException extends CentrifugoException
-{
-}
+use Exception;
+
+final class CentrifugoConnectionException extends CentrifugoException {}
